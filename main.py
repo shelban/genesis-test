@@ -1,7 +1,10 @@
+from urllib import response
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
 from fastapi import FastAPI, HTTPException
 import requests
-import os
 from typing import List
+from creds import SENDER_EMAIL, SENDGRID_API_KEY
 app = FastAPI()
 
 
@@ -36,3 +39,17 @@ def post_subscribe(email: str):
             f.write(email + '\n')
         return {"message": "E-mail додано до списку підписки"}
 
+
+
+@app.post("/sendEmails", status_code=200)
+def send_emails_to_subscribed_users():
+    emails = get_list_of_emails()
+    mails = Mail(
+        from_email=SENDER_EMAIL,
+        to_emails=emails,
+        subject="Current BTC/UAH exchange rate report",
+        plain_text_content=f"Current exchange rate for BTC/UAH is {get_current_btc_to_uah_exchange_rate()}.\n\nSended by test-case app for Genesis school"
+        )
+    sg = SendGridAPIClient(SENDGRID_API_KEY)
+    response = sg.send(mails)
+    return {"message": "Листи надіслано підписникам відправлено"}
