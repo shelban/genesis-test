@@ -1,2 +1,4 @@
 emails.txt
 creds.py
+.idea/
+__pycache__/

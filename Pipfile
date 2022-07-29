@@ -5,6 +5,9 @@ name = "pypi"
 
 [packages]
 flask = "*"
+sendgrid = "*"
+fastapi = "*"
+requests = "*"
 
 [dev-packages]
 
