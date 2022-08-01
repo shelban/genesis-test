@@ -1,12 +1,18 @@
+import os
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 from fastapi import FastAPI, HTTPException
 import requests
 from typing import List
-from creds import SENDER_EMAIL, SENDGRID_API_KEY
+from dotenv import load_dotenv
+
+SENDGRID_API_KEY = os.getenv('SENDGRID_API_KEY')
+SENDER_EMAIL = os.getenv('SENDER_EMAIL')
 
 app = FastAPI()
 sg = SendGridAPIClient(SENDGRID_API_KEY)
+
+load_dotenv()
 
 
 def get_list_of_emails() -> List[str]:
@@ -26,20 +32,20 @@ def get_rate() -> int:
     return get_current_btc_to_uah_exchange_rate()
 
 
-@app.post("/subscribe")
-def post_subscribe(email: str):
+@app.post("/subscribe", status_code=200)
+def post_subscribe(email: str) -> dict:
     try:
         if email not in get_list_of_emails():
             with open('emails.txt', 'a') as f:
                 f.write(email + '\n')
-            return {"message":"E-mail додано до списку підписки"}
+            return {"description":"E-mail додано"}
         else:
             raise HTTPException(status_code=409,
                                 detail="E-mail вже є в списку підписки")
     except FileNotFoundError:
         with open('emails.txt', 'w') as f:
             f.write(email + '\n')
-        return {"message":"E-mail додано до списку підписки"}
+        return {"description":"E-mail додано до списку підписки"}
 
 
 @app.post("/sendEmails", status_code=200)
@@ -53,7 +59,4 @@ def send_emails_to_subscribed_users():
         plain_text_content=f"Current exchange rate for BTC/UAH is {current_rate}.\n\nSended by test-case app for Genesis school"
     )
     sg.send(mails)
-    return {"message":"Листи надіслано підписникам відправлено"}
-
-
-
+    return {"description":"E-mailʼи відправлено"}

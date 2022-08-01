@@ -2,3 +2,5 @@ emails.txt
 creds.py
 .idea/
 __pycache__/
+.env
+app/.env
